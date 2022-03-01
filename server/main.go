@@ -55,6 +55,8 @@ func main() {
 	boot := bootstrap.Bootstrap{
 		App:        app,
 		ContractUC: ContractUC,
+		Validator:  validatorDriver,
+		Translator: translator,
 	}
 
 	boot.App.Use(limiter.New(limiter.Config{

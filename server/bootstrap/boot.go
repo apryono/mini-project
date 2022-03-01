@@ -4,7 +4,7 @@ import (
 	"github.com/mini-project/usecase"
 
 	ut "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 
 	"github.com/gofiber/fiber/v2"
 )
