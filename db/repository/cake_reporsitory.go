@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"strings"
+	"time"
 
 	"github.com/mini-project/db/repository/models"
 	"github.com/mini-project/pkg/str"
@@ -11,8 +12,9 @@ import (
 
 type ICakeRepository interface {
 	Add(c context.Context, model *models.Cake) (int, error)
-	FindByID(c context.Context, id string) (models.Cake, error)
+	FindByID(c context.Context, id int) (models.Cake, error)
 	FindAllCake(c context.Context, param models.CakeParameter) ([]models.Cake, error)
+	Edit(c context.Context, req models.Cake) (int, error)
 }
 
 type CakeRepository struct {
@@ -47,7 +49,7 @@ func (r *CakeRepository) Add(c context.Context, model *models.Cake) (res int, er
 	return res, nil
 }
 
-func (r *CakeRepository) FindByID(c context.Context, id string) (res models.Cake, err error) {
+func (r *CakeRepository) FindByID(c context.Context, id int) (res models.Cake, err error) {
 	statement := str.Spacing(models.SelectCakeStatement, ` WHERE id = $1`)
 
 	row := r.DB.QueryRowContext(c, statement, id)
@@ -106,6 +108,26 @@ func (r *CakeRepository) FindAllCake(c context.Context, param models.CakeParamet
 		}
 
 		res = append(res, temp)
+	}
+
+	return res, err
+}
+
+func (r *CakeRepository) Edit(c context.Context, req models.Cake) (res int, err error) {
+	date := time.Now()
+	statement := ` UPDATE cakes SET title = $1, description = $2, rating = $3, 
+		image = $4, updated_at = $5 WHERE id = $6 returning id`
+
+	if r.Tx != nil {
+		err = r.DB.QueryRowContext(c, statement,
+			req.Title, req.Description, req.Rating, req.Image, date, req.ID).Scan(&res)
+	} else {
+		r.DB.QueryRowContext(c, statement,
+			req.Title, req.Description, req.Rating, req.Image, date, req.ID).Scan(&res)
+	}
+
+	if err != nil {
+		return res, err
 	}
 
 	return res, err
