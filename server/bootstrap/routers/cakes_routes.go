@@ -18,4 +18,5 @@ func (route CakesRoutes) RegisterRoute() {
 	r.Post("", handler.Add)
 	r.Get("/id/:id", handler.DetailCake)
 	r.Get("", handler.ListAllCake)
+	r.Put("/id/:id", handler.Edit)
 }
