@@ -34,3 +34,16 @@ func (h *Handler) Add(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, res, nil, nil, 0)
 }
+
+func (h *Handler) DetailCake(ctx *fiber.Ctx) error {
+	c := ctx.Context()
+	id := ctx.Params("id")
+
+	uc := usecase.CakeUC{ContractUC: h.ContractUC}
+	res, err := uc.FindByID(c, id)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err.Error(), http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, res, nil, nil, 0)
+}
