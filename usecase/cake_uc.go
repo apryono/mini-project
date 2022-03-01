@@ -40,3 +40,16 @@ func (uc CakeUC) AddCake(c context.Context, input *requests.CakeRequest) (res mo
 
 	return res, err
 }
+
+func (uc CakeUC) FindByID(c context.Context, ID string) (res models.Cake, err error) {
+	repo := repository.NewCakeRepository(uc.DB, uc.TX)
+	res, err = repo.FindByID(c, ID)
+	if err != nil {
+		logger.Log(logger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-find-id")
+		return res, err
+	}
+
+	uc.BuildBody(&res)
+
+	return res, err
+}
