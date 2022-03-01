@@ -9,8 +9,8 @@ type Cake struct {
 	Description string     `json:"description"`
 	Rating      int        `json:"rating"`
 	Image       string     `json:"image"`
-	CreatedAt   *time.Time `json:"created_at"`
-	UpdatedAt   *time.Time `json:"updated_at"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 // CakeParameter ...
