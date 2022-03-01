@@ -3,10 +3,12 @@ package usecase
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/mini-project/db/repository"
 	"github.com/mini-project/db/repository/models"
+	"github.com/mini-project/helper"
 	"github.com/mini-project/pkg/functioncaller"
 	"github.com/mini-project/pkg/logger"
 	"github.com/mini-project/usecase/requests"
@@ -41,7 +43,7 @@ func (uc CakeUC) AddCake(c context.Context, input *requests.CakeRequest) (res mo
 	return res, err
 }
 
-func (uc CakeUC) FindByID(c context.Context, ID string) (res models.Cake, err error) {
+func (uc CakeUC) FindByID(c context.Context, ID int) (res models.Cake, err error) {
 	repo := repository.NewCakeRepository(uc.DB, uc.TX)
 	res, err = repo.FindByID(c, ID)
 	if err != nil {
@@ -67,4 +69,35 @@ func (uc CakeUC) FindAllCake(c context.Context, param models.CakeParameter) (res
 	}
 
 	return res, err
+}
+
+func (uc CakeUC) EditCake(c context.Context, ID int, input *requests.CakeRequest) (err error) {
+	repo := repository.NewCakeRepository(uc.DB, uc.TX)
+	res, err := repo.FindByID(c, ID)
+	if err != nil && err != sql.ErrNoRows {
+		logger.Log(logger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "checking-exist")
+		return err
+	}
+
+	req := models.Cake{
+		ID:          res.ID,
+		Title:       input.Title,
+		Description: input.Description,
+		Rating:      input.Rating,
+		Image:       input.Image,
+	}
+
+	if res.ID > 0 {
+		res.ID, err = repo.Edit(c, req)
+		if err != nil && err != sql.ErrNoRows {
+			logger.Log(logger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-edit")
+			return err
+		}
+	} else {
+		logger.Log(logger.WarnLevel, helper.DataNotFound, functioncaller.PrintFuncName(), "query-edit-no-data")
+		return errors.New(helper.DataNotFound)
+
+	}
+
+	return err
 }
