@@ -20,7 +20,10 @@ type CakeUC struct {
 }
 
 //BuildBody ...
-func (uc CakeUC) BuildBody(res *models.Cake) {}
+func (uc CakeUC) BuildBody(res *models.Cake) {
+	res.CreatedAt, _ = time.Parse(time.RFC3339, res.CreatedAt.Add(time.Hour*7).Format(time.RFC3339))
+	res.UpdatedAt, _ = time.Parse(time.RFC3339, res.UpdatedAt.Add(time.Hour*7).Format(time.RFC3339))
+}
 
 func (uc CakeUC) AddCake(c context.Context, input *requests.CakeRequest) (res models.Cake, err error) {
 	timeNow := time.Now()
@@ -30,8 +33,8 @@ func (uc CakeUC) AddCake(c context.Context, input *requests.CakeRequest) (res mo
 		Description: input.Description,
 		Rating:      input.Rating,
 		Image:       input.Image,
-		CreatedAt:   &timeNow,
-		UpdatedAt:   &timeNow,
+		CreatedAt:   timeNow,
+		UpdatedAt:   timeNow,
 	}
 
 	res.ID, err = repo.Add(c, &res)
