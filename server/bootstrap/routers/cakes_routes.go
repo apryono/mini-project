@@ -11,6 +11,9 @@ type CakesRoutes struct {
 	Handler     handlers.Handler
 }
 
-func (c CakesRoutes) RegisterRoute() {
+func (route CakesRoutes) RegisterRoute() {
+	handler := handlers.CakeHandler{Handler: route.Handler}
 
+	r := route.RouterGroup.Group("/api/cake")
+	r.Post("", handler.Add)
 }
