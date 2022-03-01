@@ -5,10 +5,12 @@ import (
 	"database/sql"
 
 	"github.com/mini-project/db/repository/models"
+	"github.com/mini-project/pkg/str"
 )
 
 type ICakeRepository interface {
 	Add(c context.Context, model *models.Cake) (int, error)
+	FindByID(c context.Context, id string) (models.Cake, error)
 }
 
 type CakeRepository struct {
@@ -35,6 +37,31 @@ func (r *CakeRepository) Add(c context.Context, model *models.Cake) (res int, er
 		err = r.DB.QueryRowContext(c, statement, model.Title, model.Description, model.Rating,
 			model.Image, model.CreatedAt, model.UpdatedAt).Scan(&res)
 	}
+
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (r *CakeRepository) FindByID(c context.Context, id string) (res models.Cake, err error) {
+	statement := str.Spacing(models.SelectCakeStatement, ` WHERE id = $1`)
+
+	row := r.DB.QueryRowContext(c, statement, id)
+	res, err = r.scanRow(row)
+	if err != nil {
+		return res, err
+	}
+
+	return res, err
+
+}
+
+func (r *CakeRepository) scanRow(row *sql.Row) (res models.Cake, err error) {
+	err = row.Scan(
+		&res.ID, &res.Title, &res.Description, &res.Rating, &res.Image, &res.CreatedAt, &res.UpdatedAt,
+	)
 
 	if err != nil {
 		return res, err
