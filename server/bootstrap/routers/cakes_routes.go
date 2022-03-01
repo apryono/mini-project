@@ -19,4 +19,5 @@ func (route CakesRoutes) RegisterRoute() {
 	r.Get("/id/:id", handler.DetailCake)
 	r.Get("", handler.ListAllCake)
 	r.Put("/id/:id", handler.Edit)
+	r.Delete("/id/:id", handler.Delete)
 }
