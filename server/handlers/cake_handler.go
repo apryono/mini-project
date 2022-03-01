@@ -90,3 +90,17 @@ func (h *Handler) Edit(ctx *fiber.Ctx) error {
 
 	return h.SendResponse(ctx, "success", nil, nil, 0)
 }
+
+func (h *Handler) Delete(ctx *fiber.Ctx) error {
+	c := ctx.Context()
+	reqID := ctx.Params("id")
+	ID := str.StringToInt(reqID)
+
+	uc := usecase.CakeUC{ContractUC: h.ContractUC}
+	err := uc.DeleteByID(c, ID)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err.Error(), http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, "success", nil, nil, 0)
+}

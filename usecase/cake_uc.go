@@ -101,3 +101,20 @@ func (uc CakeUC) EditCake(c context.Context, ID int, input *requests.CakeRequest
 
 	return err
 }
+
+func (uc CakeUC) DeleteByID(c context.Context, ID int) (err error) {
+	repo := repository.NewCakeRepository(uc.DB, uc.TX)
+	res, _ := repo.FindByID(c, ID)
+	if res.ID > 0 {
+		err = repo.Delete(c, res.ID)
+		if err != nil {
+			logger.Log(logger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-delete")
+			return err
+		}
+	} else {
+		logger.Log(logger.WarnLevel, helper.DataNotFound, functioncaller.PrintFuncName(), "query-delete-no-data")
+		return errors.New(helper.DataNotFound)
+	}
+
+	return err
+}

@@ -15,6 +15,7 @@ type ICakeRepository interface {
 	FindByID(c context.Context, id int) (models.Cake, error)
 	FindAllCake(c context.Context, param models.CakeParameter) ([]models.Cake, error)
 	Edit(c context.Context, req models.Cake) (int, error)
+	Delete(c context.Context, id int) error
 }
 
 type CakeRepository struct {
@@ -119,7 +120,7 @@ func (r *CakeRepository) Edit(c context.Context, req models.Cake) (res int, err 
 		image = $4, updated_at = $5 WHERE id = $6 returning id`
 
 	if r.Tx != nil {
-		err = r.DB.QueryRowContext(c, statement,
+		err = r.Tx.QueryRowContext(c, statement,
 			req.Title, req.Description, req.Rating, req.Image, date, req.ID).Scan(&res)
 	} else {
 		r.DB.QueryRowContext(c, statement,
@@ -131,4 +132,20 @@ func (r *CakeRepository) Edit(c context.Context, req models.Cake) (res int, err 
 	}
 
 	return res, err
+}
+
+func (r *CakeRepository) Delete(c context.Context, id int) (err error) {
+	statement := ` DELETE FROM cakes where id = $1`
+
+	if r.Tx != nil {
+		_, err = r.Tx.ExecContext(c, statement, id)
+	} else {
+		_, err = r.DB.ExecContext(c, statement, id)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return err
 }
