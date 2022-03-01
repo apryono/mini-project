@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"strings"
 
 	"github.com/mini-project/db/repository/models"
 	"github.com/mini-project/pkg/str"
@@ -11,6 +12,7 @@ import (
 type ICakeRepository interface {
 	Add(c context.Context, model *models.Cake) (int, error)
 	FindByID(c context.Context, id string) (models.Cake, error)
+	FindAllCake(c context.Context, param models.CakeParameter) ([]models.Cake, error)
 }
 
 type CakeRepository struct {
@@ -68,4 +70,43 @@ func (r *CakeRepository) scanRow(row *sql.Row) (res models.Cake, err error) {
 	}
 
 	return res, nil
+}
+
+func (r *CakeRepository) scanRows(rows *sql.Rows) (res models.Cake, err error) {
+	err = rows.Scan(
+		&res.ID, &res.Title, &res.Description, &res.Rating, &res.Image, &res.CreatedAt, &res.UpdatedAt,
+	)
+
+	if err != nil {
+		return res, err
+	}
+
+	return res, nil
+}
+
+func (r *CakeRepository) FindAllCake(c context.Context, param models.CakeParameter) (res []models.Cake, err error) {
+	var conditionString string
+	if param.Search != "" {
+		search := strings.ToLower(param.Search)
+		conditionString += ` WHERE lower(title) LIKE '%` + search + `%' OR lower(description) LIKE '%` + search + `%'`
+	}
+
+	statement := str.Spacing(models.SelectCakeStatement, conditionString)
+
+	rows, err := r.DB.QueryContext(c, statement)
+	if err != nil {
+		return res, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		temp, err := r.scanRows(rows)
+		if err != nil {
+			return res, err
+		}
+
+		res = append(res, temp)
+	}
+
+	return res, err
 }

@@ -17,4 +17,5 @@ func (route CakesRoutes) RegisterRoute() {
 	r := route.RouterGroup.Group("/api/cake")
 	r.Post("", handler.Add)
 	r.Get("/id/:id", handler.DetailCake)
+	r.Get("", handler.ListAllCake)
 }

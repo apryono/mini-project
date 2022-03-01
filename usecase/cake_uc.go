@@ -53,3 +53,18 @@ func (uc CakeUC) FindByID(c context.Context, ID string) (res models.Cake, err er
 
 	return res, err
 }
+
+func (uc CakeUC) FindAllCake(c context.Context, param models.CakeParameter) (res []models.Cake, err error) {
+	repo := repository.NewCakeRepository(uc.DB, uc.TX)
+	res, err = repo.FindAllCake(c, param)
+	if err != nil {
+		logger.Log(logger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-find-all")
+		return res, err
+	}
+
+	for i := range res {
+		uc.BuildBody(&res[i])
+	}
+
+	return res, err
+}

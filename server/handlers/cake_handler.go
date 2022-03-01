@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/mini-project/db/repository/models"
 	"github.com/mini-project/usecase"
 	"github.com/mini-project/usecase/requests"
 )
@@ -41,6 +42,22 @@ func (h *Handler) DetailCake(ctx *fiber.Ctx) error {
 
 	uc := usecase.CakeUC{ContractUC: h.ContractUC}
 	res, err := uc.FindByID(c, id)
+	if err != nil {
+		return h.SendResponse(ctx, nil, nil, err.Error(), http.StatusBadRequest)
+	}
+
+	return h.SendResponse(ctx, res, nil, nil, 0)
+}
+
+func (h *Handler) ListAllCake(ctx *fiber.Ctx) error {
+	c := ctx.Context()
+
+	param := models.CakeParameter{
+		Search: ctx.Query("search"),
+	}
+
+	uc := usecase.CakeUC{ContractUC: h.ContractUC}
+	res, err := uc.FindAllCake(c, param)
 	if err != nil {
 		return h.SendResponse(ctx, nil, nil, err.Error(), http.StatusBadRequest)
 	}
