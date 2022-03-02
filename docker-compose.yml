@@ -6,6 +6,6 @@ services:
     restart: always
     hostname: mini-project
     ports: 
-      - "4000:3000"
+      - "3000:3000"
     volumes: 
       - "./.env:/.env"
